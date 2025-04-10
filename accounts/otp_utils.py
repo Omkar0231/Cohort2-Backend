@@ -9,7 +9,7 @@ def send_otp_to_email(email):
     send_mail(
         'Your OTP for Mentor Dashboard Login',
         f'Use this OTP to login: {otp}',
-        'anuragsinghcse1@gmail.com',
+        'anuragsinghcse1@gmail.com',  # same as your EMAIL_HOST_USER
         [email],
         fail_silently=False,
     )

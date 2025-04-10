@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'accounts',
     'knox',
+    'hackathons',
 
 
 ]
@@ -117,7 +118,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -142,3 +143,12 @@ REST_KNOX = {
     'USER_SERIALIZER':'accounts.serializers.UserSerializer',
     'TOKEN_TTL':timedelta(hours=24),
 }
+
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'anuragsinghcse1@gmail.com'
+EMAIL_HOST_PASSWORD = 'tknvkbgojrnxdraf'  # use app-specific password

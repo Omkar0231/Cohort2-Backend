@@ -16,8 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from accounts.views import home_view  #  Import the home_view
 
 urlpatterns = [
+    path('', home_view),  #  Root URL to fix the 404
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
+    path('api/', include('hackathons.urls')),
+
+    #path('api/', include('api.urls')),  # Optional
 ]
+
