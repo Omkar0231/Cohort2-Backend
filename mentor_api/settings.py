@@ -9,33 +9,23 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-from datetime import timedelta
 from pathlib import Path
+from datetime import timedelta
+from decouple import config
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# === Base Directory ===
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-#h#rv1@0vzm0lj8$ay31d!itb-#^ubay3o2jgqg!=pzxn@_)l-'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
-AUTH_USER_MODEL = 'accounts.CustomUser'
-
+# === Security Settings ===
+SECRET_KEY = config('SECRET_KEY', default='unsafe-secret-key')  # Use env for prod
+DEBUG = config('DEBUG', default=True, cast=bool)
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',')
 
 APPEND_SLASH = True
 
-
-# Application definition
-
+# === Installed Apps ===
 INSTALLED_APPS = [
+    # Django Core
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,15 +33,21 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # Third-party
     'rest_framework',
-    'accounts',
     'knox',
+    'corsheaders',
+
+
+    # Local Apps
+    'accounts',
     'hackathons',
-
-
+    'mentor_api',
 ]
 
+# === Middleware ===
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -61,10 +57,17 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# === CORS ===
+CORS_ALLOW_ALL_ORIGINS = True  # ⚠️ Dev only
+
+# === Custom User Model ===
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
+# === URLs & WSGI ===
 ROOT_URLCONF = 'mentor_api.urls'
+WSGI_APPLICATION = 'mentor_api.wsgi.application'
 
+# === Templates ===
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -80,12 +83,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'mentor_api.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
+# === Database ===
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -93,62 +91,41 @@ DATABASES = {
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
+# === Password Validators ===
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
+# === Internationalization ===
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'Asia/Kolkata'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+# === Static Files ===
 STATIC_URL = 'static/'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
+# === Default Auto Field ===
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# === Django REST Framework & Knox ===
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
 }
 
 REST_KNOX = {
-    'USER_SERIALIZER':'accounts.serializers.UserSerializer',
-    'TOKEN_TTL':timedelta(hours=24),
+    'USER_SERIALIZER': 'accounts.serializers.UserSerializer',
+    'TOKEN_TTL': timedelta(hours=24),
 }
 
-
-
+# === Email Settings ===
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'anuragsinghcse1@gmail.com'
-EMAIL_HOST_PASSWORD = 'tknvkbgojrnxdraf'  # use app-specific password
+EMAIL_HOST_USER = config('EMAIL_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_PASS')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

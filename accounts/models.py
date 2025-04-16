@@ -31,14 +31,26 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     GENDER_CHOICES = (
         (1, 'Male'),
         (2, 'Female'),
+        (3, 'Other'),
+    )
+
+    ROLE_CHOICES = (
+        ('student', 'Student'),
+        ('mentor', 'Mentor'),
+        ('admin', 'Admin'),
     )
 
     email = models.EmailField(max_length=255, unique=True)
     first_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(max_length=255, null=True, blank=True)
+    gender = models.SmallIntegerField(choices=GENDER_CHOICES)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='student')
+
+    phone = models.CharField(max_length=15, null=True, blank=True)
+    profile_picture = models.ImageField(upload_to='profiles/', null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    gender = models.SmallIntegerField(choices=GENDER_CHOICES)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -79,7 +91,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 class EmailOTP(models.Model):
     email = models.EmailField()
-    otp = models.CharField(max_length=6)  # FIXED: was wrong before
+    otp = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def is_expired(self):

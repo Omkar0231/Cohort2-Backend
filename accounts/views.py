@@ -1,26 +1,31 @@
+from django.http import JsonResponse
+from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from knox.models import AuthToken
-from knox.views import LogoutView, LogoutAllView
 
 from .models import CustomUser, EmailOTP
 from .serializers import (
     UserSerializer,
     CreateUserSerializer,
     UpdateUserSerializer,
-    LoginSerializer
+    LoginSerializer,
 )
 
-#HOME Page
 
-from django.http import JsonResponse
-
+# -------------------------------
+# Home View
+# -------------------------------
 def home_view(request):
+    """Welcome message for root endpoint."""
     return JsonResponse({"message": "Welcome to the Mentor Dashboard API!"})
 
-# Send OTP to email
+
+# -------------------------------
+# OTP: Send OTP to Email
+# -------------------------------
 class SendOTPView(APIView):
     permission_classes = [AllowAny]
 
@@ -34,7 +39,9 @@ class SendOTPView(APIView):
         return Response({"message": "OTP sent successfully"}, status=status.HTTP_200_OK)
 
 
-# Verify OTP and Login
+# -------------------------------
+# OTP: Verify OTP and Login
+# -------------------------------
 class VerifyOTPLoginView(APIView):
     permission_classes = [AllowAny]
 
@@ -59,21 +66,23 @@ class VerifyOTPLoginView(APIView):
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
         _, token = AuthToken.objects.create(user)
-
         return Response({
             "token": token,
             "user": UserSerializer(user).data
         }, status=status.HTTP_200_OK)
 
 
-# Traditional email + password login
-class LoginAPIView(APIView):
+# -------------------------------
+# Traditional Login (Email + Password)
+# -------------------------------
+class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
+
         _, token = AuthToken.objects.create(user)
         return Response({
             'token': token,
@@ -81,24 +90,30 @@ class LoginAPIView(APIView):
         })
 
 
-# Create new user
-class CreateUserAPI(generics.CreateAPIView):
+# -------------------------------
+# Register New User
+# -------------------------------
+class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CreateUserSerializer
     permission_classes = [AllowAny]
 
 
-# Update existing user
+# -------------------------------
+# Update Existing User
+# -------------------------------
 class UpdateUserAPI(generics.UpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UpdateUserSerializer
     permission_classes = [IsAuthenticated]
 
-# Get current user
+
+# -------------------------------
+# Get Current User Info
+# -------------------------------
 class GetCurrentUser(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user = request.user
-        serializer = UserSerializer(user)
+        serializer = UserSerializer(request.user)
         return Response(serializer.data)

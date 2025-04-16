@@ -1,29 +1,18 @@
-"""
-URL configuration for mentor_api project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
-from accounts.views import home_view  #  Import the home_view
+from accounts.views import home_view, RegisterView, LoginView
 
 urlpatterns = [
-    path('', home_view),  #  Root URL to fix the 404
     path('admin/', admin.site.urls),
+
+    # Core API Endpoints
+    path('', home_view, name='home'),  # Root welcome message
+    path('register/', RegisterView.as_view(), name='register'),
+
+    path('api/register/', RegisterView.as_view(), name='register'),
+    path('api/login/', LoginView.as_view(), name='login'),
+
+    # App-specific URLs
     path('accounts/', include('accounts.urls')),
-    path('api/', include('hackathons.urls')),
-
-    #path('api/', include('api.urls')),  # Optional
+    path('api/hackathons/', include('hackathons.urls')),
 ]
-
